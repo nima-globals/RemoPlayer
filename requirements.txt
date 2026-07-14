@@ -1,0 +1,9 @@
+PyQt6>=6.6
+python-vlc>=3.0
+tinytag>=1.10
+win11toast>=0.34
+winrt-runtime>=3.0
+winrt-Windows.Media>=3.0
+winrt-Windows.Media.Playback>=3.0
+winrt-Windows.Storage.Streams>=3.0
+winrt-Windows.Foundation>=3.0

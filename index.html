@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RemoPlayer — رادیو و موزیک برای ویندوز | RemoTeam</title>
+<meta name="description" content="RemoPlayer، پلیر رادیو و موزیک رایگان و متن‌باز برای ویندوز. دانلود مستقیم، بدون ثبت‌نام.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#06060f;
+    --bg-deep:#0a0c1c;
+    --surface:rgba(19,21,38,0.55);
+    --surface-solid:#12142a;
+    --border-soft:rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.18);
+    --cyan:#00f0ff;
+    --magenta:#ff007f;
+    --purple:#7000ff;
+    --text-1:#f3f5fc;
+    --text-2:#a6adc4;
+    --text-3:#6c7290;
+    --r-lg:28px;
+    --r-md:18px;
+    --r-sm:10px;
+    --ff-display:'Chakra Petch','Vazirmatn',sans-serif;
+    --ff-body:'Vazirmatn',sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-void);
+    color:var(--text-1);
+    font-family:var(--ff-body);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img,svg{display:block;}
+  a{color:inherit;text-decoration:none;}
+  ul{margin:0;padding:0;list-style:none;}
+  h1,h2,h3{margin:0;font-weight:700;}
+
+  a:focus-visible,
+  button:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:3px;
+    border-radius:6px;
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- ambient background ---------- */
+  .grain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0.05;
+    mix-blend-mode:overlay;
+    z-index:5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:180px 180px;
+  }
+  .aurora{
+    position:fixed;
+    inset:-20%;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(38% 30% at 12% 15%, rgba(0,240,255,0.16), transparent 60%),
+      radial-gradient(40% 32% at 88% 10%, rgba(255,0,127,0.14), transparent 60%),
+      radial-gradient(45% 40% at 50% 85%, rgba(112,0,255,0.16), transparent 60%);
+    filter:blur(10px);
+  }
+  .scanlines{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    opacity:0.35;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.018) 0px,
+      rgba(255,255,255,0.018) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:relative;
+    z-index:20;
+    padding:26px 0 10px;
+  }
+  .nav__row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--ff-display);
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    color:var(--text-1);
+  }
+  .brand__mark{
+    width:26px;height:26px;
+    border-radius:8px;
+    background:linear-gradient(135deg,var(--cyan),var(--purple));
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .brand__mark svg{width:14px;height:14px;color:#050510;}
+  .brand__sep{
+    color:var(--text-3);
+    font-weight:400;
+    font-size:13px;
+  }
+  .brand__product{color:var(--text-2);font-weight:500;}
+  .nav__cta{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    font-size:13.5px;
+    color:var(--text-2);
+  }
+  .nav__gh{
+    display:flex;align-items:center;gap:7px;
+    padding:8px 14px;
+    border:1px solid var(--border-soft);
+    border-radius:100px;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .nav__gh:hover{border-color:var(--border-strong);color:var(--text-1);}
+  .nav__gh svg{width:15px;height:15px;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:15px 26px;
+    border-radius:100px;
+    font-family:var(--ff-display);
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.01em;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .25s ease, border-color .2s ease, background .2s ease;
+    white-space:nowrap;
+  }
+  .btn svg{width:17px;height:17px;flex:none;}
+  .btn:active{transform:translateY(1px);}
+  .btn--primary{
+    background:linear-gradient(95deg,var(--cyan),var(--magenta) 55%,var(--purple));
+    color:#050510;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset, 0 18px 40px -14px rgba(0,240,255,0.45);
+  }
+  .btn--primary:hover{
+    box-shadow:0 0 0 1px rgba(255,255,255,0.14) inset, 0 22px 48px -12px rgba(255,0,127,0.55);
+    transform:translateY(-1px);
+  }
+  .btn--ghost{
+    background:rgba(255,255,255,0.02);
+    color:var(--text-1);
+    border-color:var(--border-strong);
+  }
+  .btn--ghost:hover{border-color:var(--cyan);background:rgba(0,240,255,0.06);}
+  .btn--lg{padding:18px 34px;font-size:16.5px;}
+  .btn--block{width:100%;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    z-index:2;
+    padding:64px 0 40px;
+  }
+  .hero__grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--text-2);
+    border:1px solid var(--border-soft);
+    padding:7px 14px 7px 10px;
+    border-radius:100px;
+    background:rgba(255,255,255,0.02);
+    margin-bottom:22px;
+  }
+  .eyebrow__dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 10px 2px rgba(0,240,255,0.7);
+    flex:none;
+    animation:blink 2s ease-in-out infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .hero h1{
+    font-family:var(--ff-display);
+    font-size:clamp(3rem,7vw,5.2rem);
+    line-height:0.98;
+    letter-spacing:-0.01em;
+    background:linear-gradient(100deg,#fff 5%, var(--cyan) 40%, var(--magenta) 68%, var(--purple) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:20px;
+    direction:ltr;
+    text-align:right;
+  }
+  .hero__sub{
+    font-size:18px;
+    color:var(--text-2);
+    max-width:46ch;
+    margin-bottom:32px;
+  }
+  .hero__cta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:34px;
+  }
+  .hero__meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 22px;
+    font-size:13.5px;
+    color:var(--text-3);
+  }
+  .hero__meta li{display:flex;align-items:center;gap:8px;}
+  .hero__meta svg{width:15px;height:15px;color:var(--text-3);flex:none;}
+
+  /* ---------- hero visual: app window mockup ---------- */
+  .hero__visual{
+    position:relative;
+    display:flex;
+    justify-content:center;
+  }
+  .appwin{
+    position:relative;
+    width:100%;
+    max-width:380px;
+    background:linear-gradient(180deg, rgba(24,26,46,0.9), rgba(14,15,28,0.92));
+    border:1px solid var(--border-strong);
+    border-radius:var(--r-lg);
+    backdrop-filter:blur(14px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03) inset,
+      0 40px 80px -30px rgba(0,0,0,0.7),
+      0 0 60px -10px rgba(112,0,255,0.25);
+    animation:float 6s ease-in-out infinite;
+    overflow:hidden;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-12px);}
+  }
+  .appwin__bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .appwin__dot{width:9px;height:9px;border-radius:50%;background:var(--border-strong);}
+  .appwin__title{
+    margin-inline-start:auto;
+    font-family:var(--ff-display);
+    font-size:12px;
+    color:var(--text-3);
+    letter-spacing:0.03em;
+    direction:ltr;
+  }
+  .appwin__body{padding:22px 20px 26px;}
+  .appwin__art{
+    width:100%;
+    aspect-ratio:16/9;
+    border-radius:var(--r-md);
+    background:
+      radial-gradient(60% 90% at 20% 10%, rgba(0,240,255,0.35), transparent 60%),
+      radial-gradient(65% 90% at 85% 90%, rgba(255,0,127,0.35), transparent 60%),
+      linear-gradient(140deg,#171a30,#0d0e1c);
+    border:1px solid var(--border-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  .appwin__art svg{width:38px;height:38px;color:rgba(255,255,255,0.85);}
+  .appwin__station{
+    font-size:12px;
+    color:var(--cyan);
+    font-weight:600;
+    margin:0 0 6px;
+    letter-spacing:0.01em;
+  }
+  .appwin__track{
+    font-family:var(--ff-display);
+    font-size:19px;
+    font-weight:600;
+    color:var(--text-1);
+    margin:0 0 16px;
+    direction:ltr;
+    text-align:right;
+  }
+  .eq-bars{
+    display:flex;
+    align-items:flex-end;
+    gap:3px;
+    height:34px;
+    margin-bottom:16px;
+  }
+  .eq-bar{
+    flex:1;
+    min-width:2px;
+    max-width:6px;
+    border-radius:2px;
+    background:linear-gradient(180deg,var(--cyan),var(--purple));
+    opacity:0.85;
+    transform-origin:bottom;
+    animation:eqpulse 1.3s ease-in-out infinite;
+  }
+  .eq-bar.static{animation:none;}
+  .eq-bar:nth-child(3n+2){background:linear-gradient(180deg,var(--magenta),var(--purple));}
+  .eq-bar:nth-child(3n){background:linear-gradient(180deg,var(--cyan),var(--magenta));}
+  @keyframes eqpulse{
+    0%,100%{transform:scaleY(0.18);}
+    50%{transform:scaleY(1);}
+  }
+  .appwin__progress{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .appwin__time{
+    font-family:var(--ff-display);
+    font-size:11px;
+    color:var(--text-3);
+    direction:ltr;
+  }
+  .appwin__track-bar{
+    flex:1;
+    height:4px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.09);
+    overflow:hidden;
+  }
+  .appwin__fill{
+    width:58%;
+    height:100%;
+    border-radius:4px;
+    background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  }
+  .appwin__controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+  }
+  .ctrl{
+    width:38px;height:38px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-2);
+  }
+  .ctrl svg{width:16px;height:16px;}
+  .ctrl--play{
+    width:52px;height:52px;
+    background:linear-gradient(135deg,var(--cyan),var(--purple));
+    color:#050510;
+    box-shadow:0 8px 24px -8px rgba(0,240,255,0.6);
+  }
+  .ctrl--play svg{width:18px;height:18px;}
+  .appwin__glow{
+    position:absolute;
+    inset:auto 10% -40px 10%;
+    height:80px;
+    background:radial-gradient(closest-side, rgba(112,0,255,0.45), transparent 70%);
+    filter:blur(20px);
+    z-index:-1;
+  }
+
+  /* ---------- screenshot showcase ---------- */
+  .screenshot{padding:20px 0 30px;}
+  .screenshot__frame{
+    max-width:900px;
+    margin:0 auto;
+    border-radius:var(--r-lg);
+    border:1px solid var(--border-strong);
+    background:linear-gradient(180deg, rgba(24,26,46,0.9), rgba(14,15,28,0.92));
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03) inset,
+      0 40px 80px -30px rgba(0,0,0,0.7),
+      0 0 60px -10px rgba(112,0,255,0.22);
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .screenshot__frame.in-view{opacity:1;transform:translateY(0);}
+  .screenshot__bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .screenshot__dot{width:9px;height:9px;border-radius:50%;background:var(--border-strong);}
+  .screenshot__title{
+    margin-inline-start:auto;
+    font-family:var(--ff-display);
+    font-size:12px;
+    color:var(--text-3);
+    letter-spacing:0.03em;
+    direction:ltr;
+  }
+  .screenshot__img-wrap{
+    padding:18px;
+  }
+  .screenshot__img{
+    width:100%;
+    height:auto;
+    border-radius:var(--r-md);
+    border:1px solid var(--border-soft);
+    display:block;
+  }
+
+  /* ---------- section shell ---------- */
+  section{position:relative;z-index:2;}
+  .section-head{
+    max-width:640px;
+    margin:0 auto 48px;
+    text-align:center;
+  }
+  .section-head .eyebrow{margin-inline:auto;}
+  .section-head h2{
+    font-family:var(--ff-display);
+    font-size:clamp(1.9rem,3.4vw,2.6rem);
+    margin-bottom:14px;
+  }
+  .section-head p{color:var(--text-2);font-size:16px;}
+
+  .divider-wave{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    height:20px;
+    margin:100px 0 60px;
+    opacity:0.5;
+  }
+  .divider-wave span{
+    width:3px;border-radius:2px;
+    background:linear-gradient(180deg,var(--cyan),var(--purple));
+  }
+
+  /* ---------- features ---------- */
+  .features{padding:20px 0 40px;}
+  .features-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+  }
+  .feature-card{
+    --accent:var(--cyan);
+    padding:26px 22px;
+    border-radius:var(--r-md);
+    background:var(--surface);
+    border:1px solid var(--border-soft);
+    backdrop-filter:blur(10px);
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .6s ease, transform .6s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .feature-card.in-view{opacity:1;transform:translateY(0);}
+  .feature-card:hover{
+    border-color:var(--accent);
+    box-shadow:0 18px 40px -22px var(--accent);
+    transform:translateY(-4px);
+  }
+  .feature-card:nth-child(3n+1){--accent:var(--cyan);}
+  .feature-card:nth-child(3n+2){--accent:var(--magenta);}
+  .feature-card:nth-child(3n){--accent:var(--purple);}
+  .feature-card__icon{
+    width:38px;height:38px;
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb, var(--accent) 16%, transparent);
+    color:var(--accent);
+    margin-bottom:16px;
+  }
+  .feature-card__icon svg{width:19px;height:19px;}
+  .feature-card h3{
+    font-size:15.5px;
+    margin-bottom:8px;
+    color:var(--text-1);
+  }
+  .feature-card p{
+    font-size:13.5px;
+    color:var(--text-3);
+    margin:0;
+    line-height:1.65;
+  }
+
+  /* ---------- download ---------- */
+  .download{padding:20px 0 100px;}
+  .download-card{
+    position:relative;
+    max-width:840px;
+    margin:0 auto;
+    padding:56px 48px;
+    border-radius:32px;
+    background:
+      radial-gradient(120% 140% at 15% 0%, rgba(0,240,255,0.14), transparent 55%),
+      radial-gradient(120% 140% at 90% 100%, rgba(255,0,127,0.14), transparent 55%),
+      var(--surface-solid);
+    border:1px solid var(--border-strong);
+    text-align:center;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .download-card.in-view{opacity:1;transform:translateY(0);}
+  .download-card h2{
+    font-family:var(--ff-display);
+    font-size:clamp(1.8rem,3vw,2.3rem);
+    margin-bottom:14px;
+  }
+  .download-card > p.lead{color:var(--text-2);font-size:16px;margin-bottom:38px;}
+
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:40px;
+    text-align:right;
+  }
+  .step{
+    padding:20px;
+    border-radius:var(--r-md);
+    border:1px solid var(--border-soft);
+    background:rgba(255,255,255,0.02);
+  }
+  .step__num{
+    font-family:var(--ff-display);
+    font-size:12px;
+    color:var(--cyan);
+    letter-spacing:0.05em;
+    margin-bottom:10px;
+    direction:ltr;
+    display:block;
+    text-align:right;
+  }
+  .step h4{font-size:14.5px;margin-bottom:6px;color:var(--text-1);}
+  .step p{font-size:13px;color:var(--text-3);margin:0;line-height:1.6;}
+
+  .download__cta{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  .download__note{
+    font-size:13px;
+    color:var(--text-3);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .download__note svg{width:14px;height:14px;flex:none;color:var(--text-3);}
+  .download__note a{color:var(--text-2);text-decoration:underline;text-underline-offset:3px;}
+  .download__note a:hover{color:var(--cyan);}
+  .download__sub{
+    margin-top:6px;
+    font-size:13px;
+  }
+  .download__sub a{color:var(--text-2);text-decoration:underline;text-underline-offset:3px;}
+  .download__sub a:hover{color:var(--magenta);}
+
+  /* ---------- footer ---------- */
+  footer{
+    position:relative;z-index:2;
+    border-top:1px solid var(--border-soft);
+    padding:36px 0 40px;
+  }
+  .footer__row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:18px;
+  }
+  .footer__links{
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+    font-size:13.5px;
+    color:var(--text-3);
+  }
+  .footer__links a:hover{color:var(--text-1);}
+  .footer__copy{font-size:12.5px;color:var(--text-3);}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:960px){
+    .hero__grid{grid-template-columns:1fr;gap:48px;}
+    .hero h1,.hero__sub,.eyebrow{margin-inline:auto;}
+    .hero{text-align:center;}
+    .hero__cta,.hero__meta{justify-content:center;}
+    .hero__sub{margin-inline:auto;}
+    .features-grid{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:1fr;text-align:right;}
+    .download-card{padding:44px 26px;}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 18px;}
+    .features-grid{grid-template-columns:1fr;}
+    .btn--lg{width:100%;}
+    .nav__cta span{display:none;}
+    .screenshot__img-wrap{padding:10px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+    .appwin{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="aurora" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap nav__row">
+    <a class="brand" href="https://remoteam.ir">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 16 0M7.5 12a4.5 4.5 0 0 1 9 0M12 12v0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>
+      </span>
+      RemoTeam <span class="brand__sep">/</span> <span class="brand__product">RemoPlayer</span>
+    </a>
+    <div class="nav__cta">
+      <span>رایگان و متن‌باز</span>
+      <a class="nav__gh" href="https://github.com/nima-globals/RemoPlayer" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.25.8-.57v-2c-3.2.7-3.9-1.55-3.9-1.55-.53-1.35-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.18.08 1.8 1.2 1.8 1.2 1.04 1.8 2.75 1.28 3.42.98.1-.75.4-1.28.73-1.58-2.55-.29-5.24-1.28-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.77.12 3.06.73.8 1.17 1.82 1.17 3.07 0 4.39-2.7 5.36-5.26 5.65.41.36.78 1.08.78 2.17v3.22c0 .32.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__content">
+        <span class="eyebrow"><span class="eyebrow__dot"></span> رایگان، متن‌باز و ساخته‌شده برای ویندوز</span>
+        <h1>RemoPlayer</h1>
+        <p class="hero__sub">رادیوی اینترنتی و موزیک‌های خودتان، در یک پلیر سبک برای ویندوز؛ با ویجت مدیای بومی، اعلان لحظه‌ای تغییر آهنگ و بدون هیچ تنظیم اضافه‌ای.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="https://github.com/nima-globals/RemoPlayer/releases/latest/download/RemoPlayer.exe">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13m0 0-5-5m5 5 5-5M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            دانلود برای ویندوز
+          </a>
+          <a class="btn btn--ghost btn--lg" href="https://github.com/nima-globals/RemoPlayer" target="_blank" rel="noopener">
+            مشاهده کد در گیت‌هاب
+          </a>
+        </div>
+        <ul class="hero__meta">
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ویندوز ۱۰ و ۱۱</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> رایگان و MIT</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> بدون نیاز به ثبت‌نام</li>
+        </ul>
+      </div>
+
+      <div class="hero__visual" aria-hidden="true">
+        <div class="appwin">
+          <div class="appwin__bar">
+            <span class="appwin__dot"></span><span class="appwin__dot"></span><span class="appwin__dot"></span>
+            <span class="appwin__title">RemoPlayer.exe</span>
+          </div>
+          <div class="appwin__body">
+            <div class="appwin__art">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="appwin__station">در حال پخش · Chill Beats FM</p>
+            <h3 class="appwin__track">Midnight Frequency</h3>
+            <div class="eq-bars"></div>
+            <div class="appwin__progress">
+              <span class="appwin__time">3:50</span>
+              <div class="appwin__track-bar"><div class="appwin__fill"></div></div>
+              <span class="appwin__time">2:14</span>
+            </div>
+            <div class="appwin__controls">
+              <span class="ctrl"><svg viewBox="0 0 24 24" fill="none"><path d="M17 5v14M7 12l10-7v14L7 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+              <span class="ctrl ctrl--play"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6h2.2v12H9zM12.8 6H15v12h-2.2z" fill="currentColor"/></svg></span>
+              <span class="ctrl"><svg viewBox="0 0 24 24" fill="none"><path d="M7 5v14M17 12 7 5v14l10-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+          <div class="appwin__glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-wave" aria-hidden="true">
+    <span style="height:6px"></span><span style="height:12px"></span><span style="height:18px"></span><span style="height:9px"></span><span style="height:15px"></span><span style="height:6px"></span><span style="height:20px"></span><span style="height:10px"></span><span style="height:14px"></span>
+  </div>
+
+  <!-- SCREENSHOT -->
+  <section class="screenshot" id="screenshot">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow"><span class="eyebrow__dot"></span> نمای واقعی</span>
+        <h2>محیط برنامه از نزدیک</h2>
+        <p>همین چیزی است که روی سیستم شما اجرا می‌شود؛ ساده، تمیز و بدون شلوغی اضافه.</p>
+      </div>
+      <div class="screenshot__frame reveal">
+        <div class="screenshot__bar">
+          <span class="screenshot__dot"></span><span class="screenshot__dot"></span><span class="screenshot__dot"></span>
+          <span class="screenshot__title">RemoPlayer.exe</span>
+        </div>
+        <div class="screenshot__img-wrap">
+          <img class="screenshot__img" src="https://github.com/nima-globals/RemoPlayer/raw/main/assets/screenshot-main.png" alt="نمای محیط برنامه RemoPlayer در حال پخش موزیک" loading="lazy" width="1000" height="730">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-wave" aria-hidden="true">
+    <span style="height:6px"></span><span style="height:12px"></span><span style="height:18px"></span><span style="height:9px"></span><span style="height:15px"></span><span style="height:6px"></span><span style="height:20px"></span><span style="height:10px"></span><span style="height:14px"></span>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">امکانات</span>
+        <h2>همه‌چیز، توی یک پلیر ساده</h2>
+        <p>از تیون‌کردن رادیوی مورد علاقه‌تان تا گوش‌دادن به موزیک‌های خودتان — با یکپارچگی کامل با ویندوز.</p>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 16 0M7.5 12a4.5 4.5 0 0 1 9 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></div>
+          <h3>رادیوی اینترنتی</h3>
+          <p>به ده‌ها ایستگاه آنلاین گوش کنید یا ایستگاه دلخواه‌تان را با یک لینک ساده اضافه کنید.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+          <h3>پخش موزیک لوکال</h3>
+          <p>فایل‌های mp3، wav، flac و ogg را با کاور آلبوم، نام خواننده و نوار پیشرفت پخش کنید.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          <h3>ویجت مدیای ویندوز</h3>
+          <p>عنوان و کاور آهنگ در همان ویجت بالای Notification Center نمایش داده می‌شود؛ کلیدهای مدیا هم کار می‌کنند.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          <h3>اعلان تغییر آهنگ</h3>
+          <p>با هر بار عوض‌شدن آهنگ رادیو، یک نوتیفیکیشن ویندوزی دریافت می‌کنید.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>تاریخچه پخش</h3>
+          <p>هر چیزی که گوش داده‌اید به‌صورت خودکار ذخیره می‌شود تا هر وقت خواستید برگردید سراغش.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+          <h3>پشتیبانی از پروکسی</h3>
+          <p>استریم‌ها را در صورت نیاز از پروکسی HTTP یا SOCKS5 عبور دهید.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 6.5v5.2M9.2 8.3a5 5 0 1 0 5.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          <h3>اجرای خودکار</h3>
+          <p>به‌صورت اختیاری، همزمان با روشن‌شدن ویندوز خودش اجرا می‌شود.</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card__icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10M11 20V4M18 20v-7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></div>
+          <h3>آمار مصرف</h3>
+          <p>تخمین زنده‌ای از حجم اینترنت مصرف‌شده و مدت‌زمان گوش‌دادن‌تان را می‌بینید.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section class="download" id="download">
+    <div class="wrap">
+      <div class="download-card reveal">
+        <h2>شروع کن، در سه قدم</h2>
+        <p class="lead">نصب پایتون یا هیچ پیش‌نیاز پیچیده‌ای لازم نیست.</p>
+
+        <div class="steps">
+          <div class="step">
+            <span class="step__num">01</span>
+            <h4>دانلود کن</h4>
+            <p>فایل RemoPlayer.exe را مستقیماً از آخرین نسخه‌ی منتشرشده در گیت‌هاب بگیرید.</p>
+          </div>
+          <div class="step">
+            <span class="step__num">02</span>
+            <h4>VLC را نصب کن</h4>
+            <p>اگر از قبل ندارید، VLC Media Player را نصب کنید؛ موتور پخش صدای RemoPlayer همین است.</p>
+          </div>
+          <div class="step">
+            <span class="step__num">03</span>
+            <h4>اجرا کن و گوش بده</h4>
+            <p>بدون ثبت‌نام و بدون تنظیمات اضافه — فقط اجرا کنید و رادیو یا موزیک‌تان را انتخاب کنید.</p>
+          </div>
+        </div>
+
+        <div class="download__cta">
+          <a class="btn btn--primary btn--lg" href="https://github.com/nima-globals/RemoPlayer/releases/latest/download/RemoPlayer.exe">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13m0 0-5-5m5 5 5-5M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            دانلود RemoPlayer.exe
+          </a>
+          <p class="download__note">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 11v5M12 8v.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            نیازمند <a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">VLC Media Player</a> روی سیستم شما
+          </p>
+          <p class="download__sub"><a href="https://github.com/nima-globals/RemoPlayer/releases" target="_blank" rel="noopener">دیدن همه نسخه‌ها و تغییرات →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer__row">
+    <div class="brand">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 16 0M7.5 12a4.5 4.5 0 0 1 9 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>
+      </span>
+      RemoTeam <span class="brand__sep">/</span> <span class="brand__product">RemoPlayer</span>
+    </div>
+    <ul class="footer__links">
+      <li><a href="https://github.com/nima-globals/RemoPlayer" target="_blank" rel="noopener">گیت‌هاب</a></li>
+      <li><a href="https://github.com/nima-globals/RemoPlayer/blob/main/LICENSE" target="_blank" rel="noopener">لایسنس MIT</a></li>
+      <li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">VLC</a></li>
+      <li><a href="https://nimaebrahimi.ir" target="_blank" rel="noopener">Nima Ebrahimi</a></li>
+    </ul>
+  </div>
+  <div class="wrap">
+    <p class="footer__copy" style="margin-top:22px;">© 2026 RemoTeam — ساخته‌شده برای جامعه‌ی ویندوزی‌های فارسی‌زبان.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // build equalizer bars
+  var eq = document.querySelector('.eq-bars');
+  if(eq){
+    var count = 26;
+    for(var i=0;i<count;i++){
+      var bar = document.createElement('span');
+      bar.className = 'eq-bar';
+      if(reduceMotion){
+        bar.classList.add('static');
+        bar.style.height = (25 + Math.random()*65) + '%';
+      } else {
+        bar.style.animationDuration = (0.7 + Math.random()*1.1).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random()*1.2).toFixed(2) + 's';
+      }
+      eq.appendChild(bar);
+    }
+  }
+
+  // scroll reveal
+  var revealEls = document.querySelectorAll('.reveal');
+  if(reduceMotion || !('IntersectionObserver' in window)){
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  } else {
+    var counters = new WeakMap();
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var parent = entry.target.parentElement;
+          var idx = counters.get(parent) || 0;
+          entry.target.style.transitionDelay = (idx * 70) + 'ms';
+          counters.set(parent, idx + 1);
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.15});
+    revealEls.forEach(function(el){ observer.observe(el); });
+  }
+})();
+</script>
+
+</body>
+</html>
